@@ -7,6 +7,7 @@ demoed in office on 12-17-15
 */
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <pthread.h>
 #include<time.h>
 #ifndef EVENTQUEUE_H_INCLUDED
