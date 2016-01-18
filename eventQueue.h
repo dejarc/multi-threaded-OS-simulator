@@ -28,7 +28,7 @@ demoed in office on 12-17-15
 #define READ_WRITE 20 
 #define MUT_RES_PAIRS 25
 #define NA -1
-#define UPPER_LIMIT 15000
+#define UPPER_LIMIT 1000
 #define NEW_INSERT 29    
 #define MUT_RES_INSERT 11
 #define FIRST_DEADLOCK_CHECK 60000
