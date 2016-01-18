@@ -17,9 +17,9 @@ void writeValue(node myNode)
 		safeRead[myNode->processes->process_id / 2] = TRUE;	
 		safeWrite[myNode->processes->process_id / 2] = FALSE;
 		pthread_mutex_unlock(&mutexes[myNode->processes->process_id / 2]);
-        pthread_mutex_lock(&readyQueueAdd);
+        	pthread_mutex_lock(&readyQueueAdd);
 		addNode(myReadyQueue, myNode);
-        pthread_mutex_unlock(&readyQueueAdd); 
+        	pthread_mutex_unlock(&readyQueueAdd); 
 	}			
 }
 /*to read the new value written*/
@@ -33,15 +33,15 @@ void readValue(node myNode)
 		myNode->processes->myValue = myNum[myNode->processes->process_id / 2];
 		safeWrite[myNode->processes->process_id / 2] = TRUE;
 		safeRead[myNode->processes->process_id / 2] = FALSE;
-        pthread_mutex_lock(&printMutex);		
+        	pthread_mutex_lock(&printMutex);		
 		printf("\nnew value of num is %d read by consumer number %d",myNode->processes->myValue, myNode->processes->process_id);		
-        pthread_mutex_unlock(&printMutex);
+        	pthread_mutex_unlock(&printMutex);
 		fprintf(fp,"\nnew value read by consumer: %d ",myNode->processes->myValue);
 		pthread_mutex_unlock(&mutexes[myNode->processes->process_id / 2]);
-	    usleep(40000);
+	    	usleep(40000);
 		pthread_mutex_lock(&readyQueueAdd);
-        addNode(myReadyQueue, myNode);
-        pthread_mutex_unlock(&readyQueueAdd);
+        	addNode(myReadyQueue, myNode);
+        	pthread_mutex_unlock(&readyQueueAdd);
     }
 		
 }
@@ -68,15 +68,15 @@ void* deadlockDetectorThread(void *myDeadlock) {
         }
 }
 void deadlockHelper() {
-	    float waitTime;
-	    int current_time;
-        current_time = clock();
-        waitTime = (double)(current_time - last_time_run) / current_time;
-		fprintf(fp2, "\nprocess %d has spent %f percent of \ntotal cpu cycle time spent waiting", last_process_id, waitTime);
-		if(waitTime >= 0.850000) {
-			fprintf(fp2,"\nprocess %d  last ran at %d and has been waiting %f of processor time"
-			, last_process_id, last_time_run, waitTime);
-		}
+	float waitTime;
+	int current_time;
+	current_time = clock();
+	waitTime = (double)(current_time - last_time_run) / current_time;
+	fprintf(fp2, "\nprocess %d has spent %f percent of \ntotal cpu cycle time spent waiting", last_process_id, waitTime);
+	if(waitTime >= 0.850000) {
+		fprintf(fp2,"\nprocess %d  last ran at %d and has been waiting %f of processor time"
+		, last_process_id, last_time_run, waitTime);
+	}
 }
 /*run the cpu
 @param myReadyQueue the queue of processes waiting for CPU access
@@ -84,10 +84,10 @@ void deadlockHelper() {
 void runCpu(fifoQueue myReadyQueue, node *myNode) {
 	char type;
 	(*myNode)->processes->time_stamp = clock();
-    pthread_mutex_lock(&deadlockCheck);
-    last_time_run =	(*myNode)->processes->time_stamp;
-    last_process_id = (*myNode)->processes->process_id;
-    pthread_mutex_unlock(&deadlockCheck); 
+	pthread_mutex_lock(&deadlockCheck);
+	last_time_run =	(*myNode)->processes->time_stamp;
+	last_process_id = (*myNode)->processes->process_id;
+    	pthread_mutex_unlock(&deadlockCheck); 
 	++(*myNode)->processes->usedQuanta;
 	if((*myNode)->processes->consumer) {
 		readValue(*myNode);
@@ -99,12 +99,7 @@ void runCpu(fifoQueue myReadyQueue, node *myNode) {
 		(*myNode) = returnFirst(&myReadyQueue);
 		new_process = TRUE;
 	}else if((*myNode)->processes->aType || (*myNode)->processes->bType) {
-		/*if((*myNode)->processes->aType) {
-			addNode(aBlocked,*myNode);
-		} else {
-			addNode(bBlocked,*myNode);
-		}*/
-        tryLockSingleThread(*myNode);
+        	tryLockSingleThread(*myNode);
 		(*myNode) = returnFirst(&myReadyQueue);
 		new_process = TRUE;
 	}  else {
@@ -131,12 +126,12 @@ void runIo(fifoQueue myIo) {
 			temp = returnFirst(&myIo);
 			temp->processes->ioLength = rand() % IO_LENGTH + OFFSET;
 			temp->processes->state = ready;
-            pthread_mutex_lock(&printMutex);
-            printf("\nprocess id %d done with io", temp->processes->process_id);         
-            pthread_mutex_unlock(&printMutex);
-            pthread_mutex_lock(&readyQueueAdd);
-            addNode(myReadyQueue, temp);
-            pthread_mutex_unlock(&readyQueueAdd);
+			pthread_mutex_lock(&printMutex);
+			printf("\nprocess id %d done with io", temp->processes->process_id);         
+			pthread_mutex_unlock(&printMutex);
+			pthread_mutex_lock(&readyQueueAdd);
+			addNode(myReadyQueue, temp);
+			pthread_mutex_unlock(&readyQueueAdd);
 		}		
 	}
 }
@@ -159,27 +154,27 @@ void tryLock(fifoQueue myBlockedResUser) {
 		}
 		//if(myBlockedResUser->first->processes->aType) {
 			pthread_mutex_lock(&R1_mutexes[myBlockedResUser->first->processes->pair_number]);
-        	pthread_mutex_lock(&R2_mutexes[myBlockedResUser->first->processes->pair_number]);
+        		pthread_mutex_lock(&R2_mutexes[myBlockedResUser->first->processes->pair_number]);
 			pthread_mutex_unlock(&R1_mutexes[myBlockedResUser->first->processes->pair_number]);
 			pthread_mutex_unlock(&R2_mutexes[myBlockedResUser->first->processes->pair_number]);
-            pthread_mutex_lock(&printMutex);
+            		pthread_mutex_lock(&printMutex);
 			printf("\nmutex R1 locked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
 			printf("\nmutex R2 locked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
 			printf("\nboth resources in use by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
-            pthread_mutex_unlock(&printMutex);
-            fprintf(fp3,"\nmutex R1 locked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
+            		pthread_mutex_unlock(&printMutex);
+            		fprintf(fp3,"\nmutex R1 locked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
 			fprintf(fp3,"\nmutex R2 locked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
 			fprintf(fp3,"\nboth resources in use by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
-		    pthread_mutex_lock(&printMutex);	
-            printf("\nmutex R1 unlocked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
+		    	pthread_mutex_lock(&printMutex);	
+            		printf("\nmutex R1 unlocked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
 			printf("\nmutex R2 unlocked by process process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
-		    pthread_mutex_unlock(&printMutex);	
-            fprintf(fp3,"\nmutex R1 unlocked by process type %c with process id number %d", type,myBlockedResUser->first->processes->process_id);
+		    	pthread_mutex_unlock(&printMutex);	
+            		fprintf(fp3,"\nmutex R1 unlocked by process type %c with process id number %d", type,myBlockedResUser->first->processes->process_id);
 			fprintf(fp3,"\nmutex R2 unlocked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
 			temp = returnFirst(&myBlockedResUser);
-            pthread_mutex_lock(&readyQueueAdd);
+            		pthread_mutex_lock(&readyQueueAdd);
 			addNode(myReadyQueue, temp);
-            pthread_mutex_unlock(&readyQueueAdd);
+            		pthread_mutex_unlock(&readyQueueAdd);
 		/*} else {
 			pthread_mutex_lock(&R2_mutexes[myBlockedResUser->first->processes->pair_number]);
 			printf("\nmutex R2 locked by process type %c with process id number %d", type, myBlockedResUser->first->processes->process_id);
@@ -200,80 +195,79 @@ void tryLock(fifoQueue myBlockedResUser) {
 			pthread_mutex_unlock(&printMutex);
 			temp = returnFirst(&myBlockedResUser);
 			pthread_mutex_lock(&readyQueueAdd);
-            addNode(myReadyQueue, temp);
+            		addNode(myReadyQueue, temp);
 			pthread_mutex_unlock(&readyQueueAdd);
         }*/
 	}
 }
 void tryLockSingleThread(node myNode) {
-		char type;
-		if(myNode->processes->aType) {
-			type = 'A';
-		} else {
-			type = 'B';
-		}
-            /*myNode->processes->timeStamp = clock();
-            pthread_mutex_lock(&deadlockCheck);
-            last_time_run =	myNode->processes->time_stamp;
-            last_process_id = myNode->processes->process_id;
-            pthread_mutex_unlock(&deadlockCheck);*/ 
-		//if(myNode->processes->aType) {
-			pthread_mutex_lock(&R1_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R1 locked by process type %c with process id number %d", type, myNode->processes->process_id);
-            pthread_mutex_unlock(&printMutex); 
-            fprintf(fp3,"\nmutex R1 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
-        	pthread_mutex_lock(&R2_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R2 locked by process type %c with process id number %d", type, myNode->processes->process_id); 
-		    pthread_mutex_unlock(&printMutex);	
-            fprintf(fp3,"\nmutex R2 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_lock(&printMutex);
-            printf("\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_unlock(&printMutex);
-            fprintf(fp3,"\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_unlock(&R1_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id); 
-			pthread_mutex_unlock(&printMutex);
-            fprintf(fp3,"\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id);
-			pthread_mutex_unlock(&R2_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R2 unlocked by process process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_unlock(&printMutex);
-            fprintf(fp3,"\nmutex R2 unlocked by process type %c with process id number %d", type,  myNode->processes->process_id);
-            pthread_mutex_lock(&readyQueueAdd);
-			addNode(myReadyQueue, myNode);
-            pthread_mutex_unlock(&readyQueueAdd);
+	char type;
+	if(myNode->processes->aType) {
+		type = 'A';
+	} else {
+		type = 'B';
+	}
+    	/*myNode->processes->timeStamp = clock();
+    	pthread_mutex_lock(&deadlockCheck);
+    	last_time_run =	myNode->processes->time_stamp;
+    	last_process_id = myNode->processes->process_id;
+    	pthread_mutex_unlock(&deadlockCheck);*/ 
+	//if(myNode->processes->aType) {
+	pthread_mutex_lock(&R1_mutexes[myNode->processes->pair_number]);
+	pthread_mutex_lock(&printMutex);
+	printf("\nmutex R1 locked by process type %c with process id number %d", type, myNode->processes->process_id);
+	pthread_mutex_unlock(&printMutex); 
+	fprintf(fp3,"\nmutex R1 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
+	pthread_mutex_lock(&R2_mutexes[myNode->processes->pair_number]);
+	pthread_mutex_lock(&printMutex);
+	printf("\nmutex R2 locked by process type %c with process id number %d", type, myNode->processes->process_id); 
+	pthread_mutex_unlock(&printMutex);	
+	fprintf(fp3,"\nmutex R2 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
+	pthread_mutex_lock(&printMutex);
+	printf("\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
+	pthread_mutex_unlock(&printMutex);
+	fprintf(fp3,"\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
+	pthread_mutex_unlock(&R1_mutexes[myNode->processes->pair_number]);
+	pthread_mutex_lock(&printMutex);
+	printf("\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id); 
+	pthread_mutex_unlock(&printMutex);
+	fprintf(fp3,"\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id);
+	pthread_mutex_unlock(&R2_mutexes[myNode->processes->pair_number]);
+	pthread_mutex_lock(&printMutex);
+	printf("\nmutex R2 unlocked by process process type %c with process id number %d", type,  myNode->processes->process_id);
+	pthread_mutex_unlock(&printMutex);
+	fprintf(fp3,"\nmutex R2 unlocked by process type %c with process id number %d", type,  myNode->processes->process_id);
+	pthread_mutex_lock(&readyQueueAdd);
+	addNode(myReadyQueue, myNode);
+	pthread_mutex_unlock(&readyQueueAdd);
         /*} else {
-			pthread_mutex_lock(&R2_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R2 locked by process type %c with process id number %d", type, myNode->processes->process_id);
-            pthread_mutex_unlock(&printMutex); 
-            fprintf(fp3,"\nmutex R2 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
-        	pthread_mutex_lock(&R1_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R1 locked by process type %c with process id number %d", type, myNode->processes->process_id); 
-		    pthread_mutex_unlock(&printMutex);	
-            fprintf(fp3,"\nmutex R1 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_lock(&printMutex);
-            printf("\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_unlock(&printMutex);
-            fprintf(fp3,"\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_unlock(&R1_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id); 
-			pthread_mutex_unlock(&printMutex);
-            fprintf(fp3,"\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id);
-			pthread_mutex_unlock(&R2_mutexes[myNode->processes->pair_number]);
-			pthread_mutex_lock(&printMutex);
-            printf("\nmutex R2 unlocked by process process type %c with process id number %d", type,  myNode->processes->process_id);
-			pthread_mutex_unlock(&printMutex);
-            fprintf(fp3,"\nmutex R2 unlocked by process type %c with process id number %d", type,  myNode->processes->process_id);
-            pthread_mutex_lock(&readyQueueAdd);
-			addNode(myReadyQueue, myNode);
-            pthread_mutex_unlock(&readyQueueAdd);
-    
+		pthread_mutex_lock(&R2_mutexes[myNode->processes->pair_number]);
+		pthread_mutex_lock(&printMutex);
+		printf("\nmutex R2 locked by process type %c with process id number %d", type, myNode->processes->process_id);
+		pthread_mutex_unlock(&printMutex); 
+		fprintf(fp3,"\nmutex R2 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
+		pthread_mutex_lock(&R1_mutexes[myNode->processes->pair_number]);
+		pthread_mutex_lock(&printMutex);
+		printf("\nmutex R1 locked by process type %c with process id number %d", type, myNode->processes->process_id); 
+		pthread_mutex_unlock(&printMutex);	
+		fprintf(fp3,"\nmutex R1 locked by process type %c with process id number %d", type,  myNode->processes->process_id);
+		pthread_mutex_lock(&printMutex);
+		printf("\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
+		pthread_mutex_unlock(&printMutex);
+		fprintf(fp3,"\nboth resources in use by process type %c with process id number %d", type,  myNode->processes->process_id);
+		pthread_mutex_unlock(&R1_mutexes[myNode->processes->pair_number]);
+		pthread_mutex_lock(&printMutex);
+		printf("\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id); 
+		pthread_mutex_unlock(&printMutex);
+		fprintf(fp3,"\nmutex R1 unlocked by process type %c with process id number %d", type, myNode->processes->process_id);
+		pthread_mutex_unlock(&R2_mutexes[myNode->processes->pair_number]);
+		pthread_mutex_lock(&printMutex);
+		printf("\nmutex R2 unlocked by process process type %c with process id number %d", type,  myNode->processes->process_id);
+		pthread_mutex_unlock(&printMutex);
+		fprintf(fp3,"\nmutex R2 unlocked by process type %c with process id number %d", type,  myNode->processes->process_id);
+		pthread_mutex_lock(&readyQueueAdd);
+		addNode(myReadyQueue, myNode);
+		pthread_mutex_unlock(&readyQueueAdd);
         }*/
 }
 
@@ -292,7 +286,6 @@ void* timerThread(void *myParam) {
 			runTimer();
 		}
 		pthread_mutex_unlock(&timerAndCpu);
-		
 	}
 }
 /*to run the timer */
@@ -303,7 +296,6 @@ void runTimer() {
 			new_process = FALSE;
 	}
 	//printf("\nthe new timer time is %d", myTimer);
-	
 }
 
 /*to create a fifoQueue structure
@@ -319,15 +311,15 @@ fifoQueue createQueue() {
 /*create a process control block
 @return the new pcb*/
 pcb createPCB(int *id, int myProducer, int myConsumer, int myAType, int myBType) {
-    pcb new_pcb = (pcb)malloc(sizeof(struct PCB));
+	pcb new_pcb = (pcb)malloc(sizeof(struct PCB));
 	new_pcb->myValue = START_INDEX;
 	new_pcb->producer = myProducer;
 	new_pcb->consumer = myConsumer;
-    new_pcb->runLength = PCB_RUN + rand() % PCB_RUN;
-    new_pcb->usedQuanta = FALSE;
-    new_pcb->ioLength = rand() % IO_LENGTH + OFFSET;
-    new_pcb->process_id = *id;
-    new_pcb->state = ready;
+	new_pcb->runLength = PCB_RUN + rand() % PCB_RUN;
+	new_pcb->usedQuanta = FALSE;
+	new_pcb->ioLength = rand() % IO_LENGTH + OFFSET;
+	new_pcb->process_id = *id;
+	new_pcb->state = ready;
 	new_pcb->aType = myAType;
 	new_pcb->bType = myBType;
 	new_pcb->time_stamp = clock();
@@ -337,7 +329,7 @@ pcb createPCB(int *id, int myProducer, int myConsumer, int myAType, int myBType)
 		printf("\nnew pair number %d", mut_res_pair_num);
 	}
 	++*id;
-    return new_pcb;
+	return new_pcb;
 }
 /*create a node
 @param new_pcb the process control block pointer
